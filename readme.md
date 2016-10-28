@@ -7,3 +7,5 @@ Freccia alto/basso : selezionare una riga dei piatti del conto cliente
 A-Z : pietanza da inserire nel conto  
 CANC : cancella la pietanza dal conto sulla riga in cui è presente l'asterisco  
 ENTER/INVIO : conferma il conto e lo registra
+
+![screenshot](screenshot.jpg)
