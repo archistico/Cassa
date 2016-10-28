@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css?family=Anonymous+Pro" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="stile.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+
+  <h1>Ristorante IL MISCHIOTTO</h1>
+
+  <form>
+    <input type="button" value=" STAMPA " onclick="displayHTML(this.form)">
+  </form>
+
+  <div class="wrap">
+    <div class="fleft">
+      <h2>Conto</h2>
+      <table id="myTable">
+        <tr>
+          <th style="width:5%"></th>
+          <th style="width:40%">Piatto</th>
+          <th style="width:15%">Prezzo</th>
+        </tr>
+      </table>
+      <h2>Totale: &euro; <span id="totale">0,00</span></h2>
+    </div>
+    <div class="fright">
+      <h2>Menu <span id="tipologia"></span></h2>
+      <table id="portate">
+        <tr>
+          <th style="width:10%">Codice</th>
+          <th style="width:40%">Piatto</th>
+          <th style="width:15%">Prezzo</th>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+
+
+
+  <script type="text/javascript">
+
+  document.addEventListener("keydown", keyDownTextField, false);
+  var listaPiatti = [];
+  var listaAcquistati = [];
+  var contTipologia = 0;
+  var linea = 0;
+  var listaTipologia = ["Antipasti", "Primi", "Secondi", "Contorni", "Dessert", "Bevande", "Generale"];
+
+  var testomenu = '{ "Antipasti":[' +
+  '{"codice":"A", "piatto":"Tagliere salumi", "prezzo":8.00}, ' +
+  '{"codice":"B", "piatto":"Tagliere formaggi", "prezzo":7.00}, ' +
+  '{"codice":"C", "piatto":"Sformato di verdure", "prezzo":7.00}, ' +
+  '{"codice":"D", "piatto":"Cestini di patate alla fontina", "prezzo":7.00}, ' +
+  '{"codice":"E", "piatto":"Pizzette di zucchine", "prezzo":7.00}, ' +
+  '{"codice":"F", "piatto":"Nidi di patate con uova", "prezzo":7.00}, ' +
+  '{"codice":"G", "piatto":"Gamberi in salsa cocktail", "prezzo":9.00} ], ' +
+  ' "Primi":[' +
+  '{"codice":"A", "piatto":"Lasagne alla bolognese", "prezzo":8.00}, ' +
+  '{"codice":"B", "piatto":"Spaghetti alla carbonara", "prezzo":8.00}, ' +
+  '{"codice":"C", "piatto":"Trofie al pesto", "prezzo":8.00}, ' +
+  '{"codice":"D", "piatto":"Amatriciana", "prezzo":8.00}, ' +
+  '{"codice":"E", "piatto":"Pasta e fagioli", "prezzo":8.00}, ' +
+  '{"codice":"F", "piatto":"Rigatoni con cipolle caramellate", "prezzo":8.00}, ' +
+  '{"codice":"G", "piatto":"Gnocchi di patate con ragù", "prezzo":8.00}, ' +
+  '{"codice":"H", "piatto":"Tortellini", "prezzo":8.00} ],' +
+  ' "Secondi":[' +
+  '{"codice":"A", "piatto":"Tagliata con rucola", "prezzo":8.00}, ' +
+  '{"codice":"B", "piatto":"Milanese", "prezzo":8.00}, ' +
+  '{"codice":"C", "piatto":"Bistecca alla valdostana", "prezzo":8.00} ]' +
+  '}';
+
+  function saveToFile(data){
+    jsonString = JSON.stringify(data);
+    $.ajax({
+      url: 'registra.php',
+      data : {'jsonString':jsonString},
+      type: 'POST'
+    });
+  }
+
+  function displayHTML(form) {
+    var tabellaconto = document.getElementById('myTable').innerHTML;
+    win = window.open(", ", 'popup', 'toolbar = no, status = no');
+    win.document.write('<html><head><meta charset="UTF-8"><link rel="stylesheet" type="text/css" href="stile.css"></head><body><h1>Ristorante IL MISCHIOTTO</h1>');
+    win.document.write('<table id="myTable">' + tabellaconto + '</table>');
+    win.document.write('</body></html>');
+  }
+
+  var Menu = JSON.parse(testomenu);
+
+  function AggiungiPortataMenu(codice, piatto, prezzo) {
+    var table = document.getElementById("portate");
+    var row = table.insertRow(-1);
+
+    var cellCodice = row.insertCell(0);
+    var cellPiatto = row.insertCell(1);
+    var cellPrezzo = row.insertCell(2);
+
+    cellCodice.innerHTML = codice;
+    cellPiatto.innerHTML = piatto;
+    cellPrezzo.innerHTML = "€ " + Number(prezzo).toFixed(2);
+  }
+
+  function DisegnaTabella() {
+    var table = document.getElementById("myTable");
+
+    table.getElementsByTagName("tbody")[0].innerHTML = table.rows[0].innerHTML;
+
+    for (i = 0; i < listaAcquistati.length; i++) {
+      var row = table.insertRow(-1);
+
+      var cellAsterisco = row.insertCell(0);
+      var cellPiatto = row.insertCell(1);
+      var cellPrezzo = row.insertCell(2);
+
+      cellAsterisco.innerHTML = (i==linea)?"*":"";
+      cellPiatto.innerHTML = listaAcquistati[i].piatto;
+      cellPrezzo.innerHTML = "€ " + Number(listaAcquistati[i].prezzo).toFixed(2);
+    }
+
+    // Calcola totale
+
+    var totale = 0;
+    for (i = 0; i < listaPiatti.length; i++) {
+      totale += listaPiatti[i];
+    }
+    document.getElementById("totale") .innerHTML = Number(totale).toFixed(2);
+
+  }
+
+  function AggiungiPiatto(piatto, prezzo) {
+    // Lista piatti scelti
+    listaAcquistati.push({"piatto" : piatto, "prezzo" : prezzo});
+    DisegnaTabella();
+  }
+
+  function cancella() {
+    var mytbl = document.getElementById("portate");
+    mytbl.getElementsByTagName("tbody")[0].innerHTML = mytbl.rows[0].innerHTML;
+  }
+
+  function caricaPortate(tipologia) {
+    switch (tipologia) {
+      case "Antipasti":
+      for (i = 0; i < Menu.Antipasti.length; i++) {
+        AggiungiPortataMenu(Menu.Antipasti[i].codice, Menu.Antipasti[i].piatto, Menu.Antipasti[i].prezzo);
+      }
+      break;
+
+      case "Primi":
+      for (i = 0; i < Menu.Primi.length; i++) {
+        AggiungiPortataMenu(Menu.Primi[i].codice, Menu.Primi[i].piatto, Menu.Primi[i].prezzo);
+      }
+      break;
+
+      case "Secondi":
+      for (i = 0; i < Menu.Secondi.length; i++) {
+        AggiungiPortataMenu(Menu.Secondi[i].codice, Menu.Secondi[i].piatto, Menu.Secondi[i].prezzo);
+      }
+      break;
+
+      default:
+
+    }
+
+
+  }
+
+  function keyDownTextField(e) {
+    var keyCode = e.keyCode;
+    if(keyCode==13) {
+      // Premuto enter
+      saveToFile(listaPiatti);
+      alert("Conto chiuso");
+    } else if (keyCode==39) {
+      // tasto freccia dx
+      if(contTipologia<listaTipologia.length-1) {
+        contTipologia+=1;
+      } else {
+        contTipologia = 0;
+      }
+
+      document.getElementById("tipologia").innerHTML = listaTipologia[contTipologia];
+      cancella();
+
+      caricaPortate(listaTipologia[contTipologia]);
+
+    } else if (keyCode==37) {
+      // tasto freccia sx
+      if(contTipologia>0) {
+        contTipologia-=1;
+      } else {
+        contTipologia = listaTipologia.length-1;
+      }
+
+      document.getElementById("tipologia").innerHTML = listaTipologia[contTipologia];
+      cancella();
+
+      caricaPortate(listaTipologia[contTipologia]);
+
+    } else if (keyCode==38) {
+      // tasto freccia su
+      if(linea>0) {
+        linea-=1;
+      } else {
+        linea = listaAcquistati.length-1;
+      }
+      DisegnaTabella();
+    } else if (keyCode==40) {
+      // tasto freccia giù
+      if(linea<listaAcquistati.length-1) {
+        linea+=1;
+      } else {
+        linea = 0;
+      }
+      DisegnaTabella();
+    }  else if (keyCode==46) {
+      // Cancella
+      listaAcquistati.splice(linea, 1);
+      listaPiatti.splice(linea, 1);
+      linea = 0;
+      DisegnaTabella();
+    } else {
+      var charTyped = String.fromCharCode((96 <= keyCode && keyCode <= 105)? keyCode-48 : keyCode);
+
+      switch (listaTipologia[contTipologia]) {
+        case "Antipasti":
+        listaPiatti.push(Menu.Antipasti[keyCode-65].prezzo);
+        AggiungiPiatto(Menu.Antipasti[keyCode-65].piatto, Menu.Antipasti[keyCode-65].prezzo);
+
+        break;
+        case "Primi":
+        listaPiatti.push(Menu.Primi[keyCode-65].prezzo);
+        AggiungiPiatto(Menu.Primi[keyCode-65].piatto, Menu.Primi[keyCode-65].prezzo);
+
+        break;
+        case "Secondi":
+        listaPiatti.push(Menu.Secondi[keyCode-65].prezzo);
+        AggiungiPiatto(Menu.Secondi[keyCode-65].piatto, Menu.Secondi[keyCode-65].prezzo);
+
+        break;
+
+        default:
+
+      }
+
+    }
+  }
+
+  document.getElementById("tipologia").innerHTML = listaTipologia[0];
+  caricaPortate(listaTipologia[0]);
+
+  </script>
+
+
+
+</body>
+</html>

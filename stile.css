@@ -1,0 +1,79 @@
+body {
+  font-family: 'Anonymous Pro', monospace;
+}
+
+table {
+
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 5px;
+}
+
+table, th, td {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+table#myTable tr:nth-child(even) {
+    background-color: #eee;
+}
+table#myTable tr:nth-child(odd) {
+   background-color:#fff;
+}
+table#myTable th {
+    background-color: black;
+    color: white;
+}
+
+table#myTable td:nth-child(1) {
+    text-align: center;
+}
+
+table#myTable td:nth-child(2) {
+    text-align: left;
+}
+
+table#myTable td:nth-child(3) {
+    text-align: center;
+}
+
+
+
+
+.wrap {
+width: 100%;
+overflow:auo;
+}
+
+.fleft {
+    float:left;
+    width: 40%;
+}
+
+.fright {
+float: right;
+    width: 60%;
+}
+
+table#portate tr:nth-child(even) {
+    background-color: #eee;
+}
+table#portate tr:nth-child(odd) {
+   background-color:#fff;
+}
+table#portate th {
+    background-color: black;
+    color: white;
+}
+
+table#portate td:nth-child(1) {
+    text-align: center;
+}
+
+table#portate td:nth-child(2) {
+    text-align: left;
+}
+
+table#portate td:nth-child(3) {
+    text-align: right;
+}
